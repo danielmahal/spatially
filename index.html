@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Spatially</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+
+  <style>
+    body {
+      background: #2f2f34;
+    }
+
+    .board {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: translateZ(0);
+    }
+
+    .user {
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      margin-left: -30px;
+      margin-top: -30px;
+      background: url(https://dl.dropboxusercontent.com/u/3058340/Screen%20Shot%202014-09-17%20at%2001.28.58%20.png);
+      background-size: cover;
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0.8);
+      transition: margin-top, box-shadow;
+      transition-duration: 300ms;
+      transition-timing-function: cubic-bezier(0.250, 1.650, 0.605, 0.670);
+    }
+
+    .user.me {
+      cursor: -webkit-grab;
+      border: 2px white solid;
+    }
+
+    .dragging .user {
+      margin-top: -50px;
+      box-shadow: 0 20px 10px 0 rgba(0, 0, 0, 0.4);
+      transition-timing-function: cubic-bezier(0.190, 1.000, 0.220, 1.000);
+    }
+
+    .dragging .board,
+    .dragging .user {
+      cursor: -webkit-grabbing;
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+    <div class="user me"></div>
+  </div>
+
+  <script>
+    var context =  new window.webkitAudioContext()
+    // var analyser = context.createAnalyser();
+    var source
+
+    navigator.webkitGetUserMedia({ audio: true, video: false}, function(mediaStream) {
+      source = context.createMediaStreamSource(mediaStream)
+
+      source.connect(context.destination)
+      // source.connect(analyser);
+
+      // analyser.fftSize = 256;
+
+      // var bufferLength = analyser.frequencyBinCount
+      // var dataArray = new Uint8Array(bufferLength);
+
+      // analyser.getByteTimeDomainData(dataArray);
+
+      // (function loop() {
+      //   analyser.getByteTimeDomainData(dataArray);
+
+      //   var total = 0
+
+      //   for(var i = 0; i < bufferLength; i++) {
+      //     total += dataArray[i]
+      //   }
+
+      //   console.log(total / bufferLength / 128)
+
+      //   window.webkitRequestAnimationFrame(loop)
+      // })()
+
+    }, function() {
+      console.log('Cant get audio')
+    })
+
+    var animationRequest
+    var dragging
+    var me = document.querySelector('.me')
+
+    var inputOffset
+
+    var target = {
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2
+    }
+
+    var position = {
+      x: target.x,
+      y: target.y
+    }
+
+    var start = function(e) {
+      var input = 'ontouchstart' in window ? e.changedTouches[0] : e
+
+      inputOffset = {
+        x: input.clientX - position.x,
+        y: input.clientY - position.y
+      }
+
+      dragging = true
+
+      document.body.classList.add('dragging')
+      document.addEventListener('mousemove', move)
+      document.addEventListener('mouseup', end)
+      document.addEventListener('touchmove', move)
+      document.addEventListener('touchend', end)
+    }
+
+    var move = function(e) {
+      var input = 'ontouchstart' in window ? e.changedTouches[0] : e
+
+      target = {
+        x: input.clientX - inputOffset.x,
+        y: input.clientY - inputOffset.y
+      }
+
+      if(!animationRequest) {
+        animationRequest = window.requestAnimationFrame(animate)
+      }
+    }
+
+    var end = function() {
+      dragging = false
+
+      document.body.classList.remove('dragging')
+      document.removeEventListener('mousemove', move)
+      document.removeEventListener('touchmove', move)
+      document.removeEventListener('mouseup', end)
+      document.removeEventListener('touchend', end)
+    }
+
+    var animate = function() {
+      var distance = Math.sqrt(Math.pow(target.x - position.x, 2) + Math.pow(target.y - position.y, 2))
+
+      console.log('animate')
+
+      if(distance > 1) {
+        animationRequest = window.requestAnimationFrame(animate)
+      } else {
+        window.cancelAnimationFrame(animationRequest)
+        animationRequest = null
+      }
+
+      position.x += (target.x - position.x) * 0.5
+      position.y += (target.y - position.y) * 0.5
+
+      var x = position.x
+      var y = position.y
+
+      me.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0)'
+    }
+
+    animate()
+
+    me.addEventListener('mousedown', start)
+    me.addEventListener('touchstart', start)
+
+  </script>
+</body>
+</html>
