@@ -4,7 +4,7 @@ var webpack = require('webpack')
 module.exports = {
     debug: true,
     watch: true,
-    devTool: 'eval',
+    devtool: 'eval',
 
     entry: './src/index.js',
 
