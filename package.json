@@ -6,12 +6,14 @@
   "author": "Daniel Mahal",
   "devDependencies": {
     "css-loader": "^0.7.1",
+    "exports-loader": "^0.6.2",
     "express": "^4.8.7",
     "file-loader": "^0.7.2",
     "jsx-loader": "^0.11.0",
     "react": "^0.11.1",
     "style-loader": "^0.7.1",
     "stylus-loader": "^0.4.0",
-    "webpack": "^1.4.0-beta5"
+    "webpack": "^1.4.0-beta5",
+    "firebase": "^1.0.21"
   }
 }
