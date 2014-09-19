@@ -56,13 +56,16 @@ var Application = React.createClass({
     this.setState({authClient: authClient})
   },
 
-  moveMe: function(to) {
-    console.log('Store movement in firebase', to)
+  moveMe: function(position) {
+    this.state.firebase.child('users').child(this.state.user.uid).update({
+      position: position
+    })
   },
 
   render: function() {
     var user = this.state.user
     var authClient = this.state.authClient
+
     return (
       <div className="application">
         <Auth user={user} authClient={authClient} />
