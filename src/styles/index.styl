@@ -10,3 +10,25 @@ body {
   background: backgroundColor
   color: textColor
 }
+
+.space {
+  position: absolute
+  top: 50%
+  left: 50%
+}
+
+.user {
+  position: absolute
+  transform: translate(-50%, -50%)
+  background: rgba(white, 0.5)
+  color: black
+  border-radius: 50%
+  width: 50px
+  height: @width
+  line-height: @height
+  text-align: center
+
+  &.me {
+    background: white
+  }
+}

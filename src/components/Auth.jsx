@@ -5,16 +5,13 @@
 var React = require('react/addons')
 
 var Auth = React.createClass({
-  componentDidMount: function() {
-  },
-
   render: function() {
     var user = this.props.user
 
     if (user)
-      return <div>{user}</div>
+      return <div>Authenticated</div>
 
-    return <div className="user" onClick={this.handleLogin}>Sign in</div>
+    return <div className="auth" onClick={this.handleLogin}>Sign in</div>
   },
 
   handleLogin: function() {

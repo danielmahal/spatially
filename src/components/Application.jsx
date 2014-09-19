@@ -6,11 +6,12 @@ var Firebase = require('firebase')
 var FirebaseSimpleLogin = require("../lib/FirebaseSimpleLogin")
 
 var React = require('react/addons')
-var Auth = require('./auth')
+var Auth = require('./Auth')
+var Me = require('./Me')
+var User = require('./User')
 
 var Application = React.createClass({
   getInitialState: function() {
-    var self = this
     var ref = new Firebase('https://spatially.firebaseio.com/')
 
     return {
@@ -26,6 +27,9 @@ var Application = React.createClass({
 
     // Manage login/online/offline handlers
     var authClient = new FirebaseSimpleLogin(ref, function(err, user) {
+      if(!user)
+        return
+
       if (err)
         return console.error(err)
 
@@ -55,7 +59,16 @@ var Application = React.createClass({
   render: function() {
     var user = this.state.user
     var authClient = this.state.authClient
-    return <Auth user={user} authClient={authClient} />
+    return (
+      <div className="application">
+        <Auth user={user} authClient={authClient} />
+
+        <div className="space">
+          <Me position={{ x: 0, y: 0 }} />
+          <User position={{ x: 150, y: 50 }}>User</User>
+        </div>
+      </div>
+    )
   }
 })
 
