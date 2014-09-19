@@ -17,6 +17,7 @@ var Application = React.createClass({
 
     return {
       firebase: ref,
+      users: [],
       user: null,
       userMeta: null,
       authClient: null
@@ -37,7 +38,6 @@ var Application = React.createClass({
       if (err)
         return console.error(err)
 
-      console.log(arguments)
       ref.child('online').child(user.uid).set(true)
       ref.child('online').child(user.uid).onDisconnect().remove()
       ref.child('.info/authenticated').on('value', function(snap) {
@@ -46,10 +46,12 @@ var Application = React.createClass({
           ref.child('online').child(user.uid).remove()
       })
 
-      ref.child('users').child(user.uid).on('value', function(snap) {
-        var userMeta = snap.val()
+      ref.child('users').on('value', function(snap) {
+        self.setState({users: snap.val()})
+      })
 
-        self.setState({userMeta: userMeta})
+      ref.child('users').child(user.uid).on('value', function(snap) {
+        self.setState({userMeta: snap.val()})
       })
 
       self.setState({user: user})
@@ -77,8 +79,20 @@ var Application = React.createClass({
     var authClient = this.state.authClient
     var me
 
-    if(userMeta) {
-      me = Me(lodash.extend(lodash.clone(userMeta), {
+    var otherUsers = lodash.reject(this.state.users, function(other, uid) {
+      return uid === user.uid
+    })
+
+    var others = lodash.map(otherUsers, function(other) {
+      return User(other)
+    })
+
+    if(user) {
+      var meta = lodash.clone(userMeta) || {
+        position: { x: 0, y: 0 }
+      }
+
+      me = Me(lodash.extend(meta, {
          move: this.moveMe
       }))
     }
@@ -89,7 +103,7 @@ var Application = React.createClass({
 
         <div className="space">
           {me}
-          <User position={{ x: 150, y: 50 }}>User</User>
+          {others}
         </div>
       </div>
     )
