@@ -37,7 +37,6 @@ var Me = React.createClass({
   },
 
   onMouseUp: function() {
-    console.log('Drag')
     this.unbindDragEvents()
   },
 
