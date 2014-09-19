@@ -7,6 +7,7 @@ var User = require('./User')
 
 var Me = React.createClass({
   getInitialState: function() {
+    // TODO: Remove when hooked up to firebase. Use props directly
     return {
       position: this.props.position
     }
@@ -27,12 +28,16 @@ var Me = React.createClass({
 
   onMouseMove: function(e) {
     e.preventDefault()
+    var position = {
+      x: e.clientX - this.startOffset.x,
+      y: e.clientY - this.startOffset.y
+    }
+
+    // TODO: Store position in firebase when moved. Remove position state
+    this.props.move(position)
 
     this.setState({
-      position: {
-        x: e.clientX - this.startOffset.x,
-        y: e.clientY - this.startOffset.y
-      }
+      position: position
     })
   },
 

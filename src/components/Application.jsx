@@ -56,6 +56,10 @@ var Application = React.createClass({
     this.setState({authClient: authClient})
   },
 
+  moveMe: function(to) {
+    console.log('Store movement in firebase', to)
+  },
+
   render: function() {
     var user = this.state.user
     var authClient = this.state.authClient
@@ -64,7 +68,7 @@ var Application = React.createClass({
         <Auth user={user} authClient={authClient} />
 
         <div className="space">
-          <Me position={{ x: 0, y: 0 }} />
+          <Me position={{ x: 0, y: 0 }} move={this.moveMe} />
           <User position={{ x: 150, y: 50 }}>User</User>
         </div>
       </div>
