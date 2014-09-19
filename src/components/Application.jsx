@@ -9,6 +9,7 @@ var React = require('react/addons')
 var Auth = require('./Auth')
 var Me = require('./Me')
 var User = require('./User')
+var lodash = require('lodash')
 
 var Application = React.createClass({
   getInitialState: function() {
@@ -26,7 +27,7 @@ var Application = React.createClass({
     var self = this
     var ref = this.state.firebase
 
-    /* 
+    /*
      *  Manage login/online/offline handlers
      */
     var authClient = new FirebaseSimpleLogin(ref, function(err, user) {
@@ -74,13 +75,20 @@ var Application = React.createClass({
     var user = this.state.user
     var userMeta = this.state.userMeta
     var authClient = this.state.authClient
+    var me
+
+    if(userMeta) {
+      me = Me(lodash.extend(lodash.clone(userMeta), {
+         move: this.moveMe
+      }))
+    }
 
     return (
       <div className="application">
         <Auth user={user} userMeta={userMeta} authClient={authClient} />
 
         <div className="space">
-          <Me position={{ x: 0, y: 0 }} move={this.moveMe} />
+          {me}
           <User position={{ x: 150, y: 50 }}>User</User>
         </div>
       </div>
