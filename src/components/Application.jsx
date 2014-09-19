@@ -17,6 +17,7 @@ var Application = React.createClass({
     return {
       firebase: ref,
       user: null,
+      userMeta: null,
       authClient: null
     }
   },
@@ -25,7 +26,9 @@ var Application = React.createClass({
     var self = this
     var ref = this.state.firebase
 
-    // Manage login/online/offline handlers
+    /* 
+     *  Manage login/online/offline handlers
+     */
     var authClient = new FirebaseSimpleLogin(ref, function(err, user) {
       if(!user)
         return
@@ -42,7 +45,12 @@ var Application = React.createClass({
           ref.child('online').child(user.uid).remove()
       })
 
-      ref.child('users').child(user.uid).set({})
+      ref.child('users').child(user.uid).on('value', function(snap) {
+        var userMeta = snap.val()
+
+        self.setState({userMeta: userMeta})
+      })
+
       self.setState({user: user})
     })
 
@@ -64,11 +72,12 @@ var Application = React.createClass({
 
   render: function() {
     var user = this.state.user
+    var userMeta = this.state.userMeta
     var authClient = this.state.authClient
 
     return (
       <div className="application">
-        <Auth user={user} authClient={authClient} />
+        <Auth user={user} userMeta={userMeta} authClient={authClient} />
 
         <div className="space">
           <Me position={{ x: 0, y: 0 }} move={this.moveMe} />
