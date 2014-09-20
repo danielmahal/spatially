@@ -5,6 +5,8 @@ require('./styles/index.styl')
 var React = require('react')
 var Application = require('./components/Application')
 
+React.initializeTouchEvents(true)
+
 window.React = React
 
 window.addEventListener('load', function() {
