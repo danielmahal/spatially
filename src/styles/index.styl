@@ -13,22 +13,53 @@ body {
 
 .space {
   position: absolute
-  top: 50%
-  left: 50%
-}
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
 
-.user {
-  position: absolute
-  transform: translate(-50%, -50%)
-  background: rgba(white, 0.5)
-  color: black
-  border-radius: 50%
-  width: 50px
-  height: @width
-  line-height: @height
-  text-align: center
+  .user {
+    position: absolute
+    top: 50%
+    left: 50%
+    transform: translate(-50%, -50%)
+    color: black
+    border-radius: 50%
+    width: 70px
+    height: @width
+    line-height: @height
+    text-align: center
+    overflow: hidden
+    border: 2px white solid
 
-  &.me {
-    background: white
+    img {
+      position: absolute
+      top: 50%
+      left: 50%
+      transform: translate(-50%, -50%)
+      width: 100%
+    }
+
+    &.me {
+      border-color: white
+      cursor: -webkit-grab;
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0.8);
+      transition: margin-top, box-shadow;
+      transition-duration: 300ms;
+      transition-timing-function: cubic-bezier(0.250, 1.650, 0.605, 0.670);
+    }
+  }
+
+  &.dragging {
+    &,
+    .user {
+      cursor: -webkit-grabbing;
+    }
+
+    .me {
+      margin-top: -20px;
+      box-shadow: 0 20px 10px 0 rgba(0, 0, 0, 0.2);
+      transition-timing-function: cubic-bezier(0.190, 1.000, 0.220, 1.000);
+    }
   }
 }

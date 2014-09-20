@@ -20,7 +20,8 @@ var Application = React.createClass({
       users: [],
       user: null,
       userMeta: null,
-      authClient: null
+      authClient: null,
+      dragging: false
     }
   },
 
@@ -67,9 +68,41 @@ var Application = React.createClass({
     this.setState({authClient: authClient})
   },
 
+  setDrag: function(toggle) {
+    this.setState({
+      dragging: toggle
+    })
+  },
+
   moveMe: function(position) {
     this.state.firebase.child('users').child(this.state.user.uid).update({
       position: position
+    })
+  },
+
+  renderMe: function() {
+    if(this.state.user) {
+      var userMeta = this.state.userMeta
+      var props = lodash.extend(lodash.clone(userMeta), {
+         move: this.moveMe,
+         setDrag: this.setDrag
+      })
+
+      return Me(props)
+    }
+  },
+
+  renderOthers: function() {
+    var user = this.state.user
+
+    var otherUsers = lodash.reject(this.state.users, function(other, uid) {
+      return uid === user.uid
+    })
+
+    return lodash.map(otherUsers, function(other, key) {
+      return User(lodash.extend(other, {
+        key: key
+      }))
     })
   },
 
@@ -77,31 +110,19 @@ var Application = React.createClass({
     var user = this.state.user
     var userMeta = this.state.userMeta
     var authClient = this.state.authClient
-    var me
+    var me = this.renderMe()
+    var others = this.renderOthers()
 
-    var otherUsers = lodash.reject(this.state.users, function(other, uid) {
-      return uid === user.uid
-    })
-
-    var others = lodash.map(otherUsers, function(other) {
-      return User(other)
-    })
-
-    if(user) {
-      var meta = lodash.clone(userMeta) || {
-        position: { x: 0, y: 0 }
-      }
-
-      me = Me(lodash.extend(meta, {
-         move: this.moveMe
-      }))
+    var classes = {
+      space: true,
+      dragging: this.state.dragging
     }
 
     return (
       <div className="application">
         <Auth user={user} userMeta={userMeta} authClient={authClient} />
 
-        <div className="space">
+        <div className={React.addons.classSet(classes)}>
           {me}
           {others}
         </div>

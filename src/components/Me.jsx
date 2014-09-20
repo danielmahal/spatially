@@ -9,14 +9,13 @@ var Me = React.createClass({
   onMouseDown: function(e) {
     e.preventDefault()
 
-    var node = this.getDOMNode()
-
     this.startOffset = {
-      x: e.clientX - node.offsetLeft,
-      y: e.clientY - node.offsetTop
+      x: e.clientX - this.props.position.x,
+      y: e.clientY - this.props.position.y
     }
 
     this.bindDragEvents()
+    this.props.setDrag(true)
   },
 
   onMouseMove: function(e) {
@@ -30,6 +29,7 @@ var Me = React.createClass({
 
   onMouseUp: function() {
     this.unbindDragEvents()
+    this.props.setDrag(false)
   },
 
   componentWillUnmount: function() {
