@@ -9,6 +9,7 @@ var React = require('react/addons')
 var Auth = require('./Auth')
 var Me = require('./Me')
 var User = require('./User')
+var Connections = require('./Connections')
 var lodash = require('lodash')
 
 var Application = React.createClass({
@@ -106,12 +107,39 @@ var Application = React.createClass({
     })
   },
 
+  getConnections: function() {
+    var users = lodash.values(this.state.users)
+
+    return lodash.reduce(users, function(connections, a) {
+      lodash.forEach(lodash.reject(users, a), function(b) {
+        var distance = Math.sqrt(Math.pow(b.position.y - a.position.y, 2) + Math.pow(b.position.x - a.position.x, 2))
+        var volume = distance / 300
+
+        if(volume <= 1) {
+          connections.push({
+            users: [a, b],
+            distance: volume
+          })
+        }
+      })
+
+      return connections
+    }, [], this)
+  },
+
+  renderConnections: function() {
+    var connections = this.getConnections()
+
+    return <Connections connections={connections} />
+  },
+
   render: function() {
     var user = this.state.user
     var userMeta = this.state.userMeta
     var authClient = this.state.authClient
     var me = this.renderMe()
     var others = this.renderOthers()
+    var connections = this.renderConnections()
 
     var classes = {
       space: true,
@@ -123,6 +151,7 @@ var Application = React.createClass({
         <Auth user={user} userMeta={userMeta} authClient={authClient} />
 
         <div className={React.addons.classSet(classes)}>
+          {connections}
           {me}
           {others}
         </div>

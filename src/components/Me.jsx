@@ -13,9 +13,11 @@ var Me = React.createClass({
   dragStart: function(e) {
     var input = this.getInput(e)
 
+    var position = this.props.position || { x: 0, y: 0 }
+
     this.startOffset = {
-      x: input.clientX - this.props.position.x,
-      y: input.clientY - this.props.position.y
+      x: input.clientX - position.x,
+      y: input.clientY - position.y
     }
 
     this.bindDragEvents()
