@@ -21,7 +21,12 @@ var usersStore = Reflux.createStore({
 
       Fb.firebase.child('users').child(userKey).on('value', function(snap) {
         var obj = {}
-        obj[userKey] = snap.val()
+        obj[userKey] = snap.val() || {}
+
+        // If user isn't initialized yet, ignore
+        if (!('position' in obj[userKey]) || !('profilePic' in obj[userKey]))
+          return
+
         this.users = update(this.users, {$merge: obj})
 
         this.trigger(this.users)
