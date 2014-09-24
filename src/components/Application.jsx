@@ -18,7 +18,7 @@ var lodash = require('lodash')
 var Application = React.createClass({
   getInitialState: function() {
     return {
-      users: [],
+      users: {},
       user: {},
       dragging: false
     }
@@ -68,23 +68,30 @@ var Application = React.createClass({
   },
 
   getConnections: function() {
-    var users = lodash.values(this.state.users)
+    var users = this.state.users
 
-    return lodash.reduce(users, function(connections, a) {
-      lodash.forEach(lodash.reject(users, a), function(b) {
-        var distance = Math.sqrt(Math.pow(b.position.y - a.position.y, 2) + Math.pow(b.position.x - a.position.x, 2))
-        var volume = distance / 300
+    return Object.keys(users).reduce(function(connections, userA) {
+      return connections.concat(Object.keys(users)
+        .filter(function(userB) {
+          return userA > userB
+        })
+        .map(function(userB) {
+          var distance = Math.sqrt(
+            Math.pow(users[userB].position.y - users[userA].position.y, 2) +
+            Math.pow(users[userB].position.x - users[userA].position.x, 2)
+          )
 
-        if(volume <= 1) {
-          connections.push({
-            users: [a, b],
+          var volume = distance / 300
+
+          return {
+            users: [users[userA], users[userB]],
             distance: volume
-          })
-        }
-      })
-
-      return connections
-    }, [], this)
+          }
+        })
+        .filter(function(connection) {
+          return connection.distance <= 1
+        }))
+    }, [])
   },
 
   renderConnections: function() {
