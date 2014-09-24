@@ -72,6 +72,9 @@ var Application = React.createClass({
 
     return lodash.reduce(users, function(connections, a) {
       lodash.forEach(lodash.reject(users, a), function(b) {
+        if (!a || !b || !a.position || !b.position)
+          return connections
+
         var distance = Math.sqrt(Math.pow(b.position.y - a.position.y, 2) + Math.pow(b.position.x - a.position.x, 2))
         var volume = distance / 300
 
