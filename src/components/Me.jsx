@@ -3,7 +3,9 @@
 'use strict';
 
 var React = require('react')
+var Actions = require('../actions')
 var User = require('./User')
+var TakePicture = require('./TakePicture')
 
 var Me = React.createClass({
   getInput: function(e) {
@@ -29,7 +31,7 @@ var Me = React.createClass({
 
     var input = this.getInput(e)
 
-    this.props.move({
+    Actions.move({
       x: input.clientX - this.startOffset.x,
       y: input.clientY - this.startOffset.y
     })
@@ -60,7 +62,9 @@ var Me = React.createClass({
 
   render: function() {
     return this.transferPropsTo(
-      <User className="me" position={this.props.position} onMouseDown={this.dragStart} onTouchStart={this.dragStart}>Me!</User>
+      <User className="me" position={this.props.position} onMouseDown={this.dragStart} onTouchStart={this.dragStart}>
+        <TakePicture profilePic={this.props.profilePic} />
+      </User>
     )
   }
 })

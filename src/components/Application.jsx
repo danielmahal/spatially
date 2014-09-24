@@ -2,11 +2,14 @@
 
 'use strict';
 
-var Firebase = require('firebase')
-var FirebaseSimpleLogin = require("../lib/FirebaseSimpleLogin")
-
 var React = require('react/addons')
-var Auth = require('./Auth')
+var Reflux = require('reflux')
+
+var userStore = require('../stores/user')
+var usersStore = require('../stores/users')
+var Actions = require('../actions')
+
+var Login = require('./Login')
 var Me = require('./Me')
 var User = require('./User')
 var Connections = require('./Connections')
@@ -14,59 +17,22 @@ var lodash = require('lodash')
 
 var Application = React.createClass({
   getInitialState: function() {
-    var ref = new Firebase('https://spatially.firebaseio.com/')
-
     return {
-      firebase: ref,
       users: [],
-      user: null,
-      userMeta: null,
-      authClient: null,
+      user: {},
       dragging: false
     }
   },
 
   componentDidMount: function() {
-    var self = this
-    var ref = this.state.firebase
 
-    /*
-     *  Manage login/online/offline handlers
-     */
-    var authClient = new FirebaseSimpleLogin(ref, function(err, user) {
-      if(!user)
-        return
+    userStore.listen(function(user) {
+      this.setState({user: user})
+    }.bind(this))
 
-      if (err)
-        return console.error(err)
-
-      ref.child('online').child(user.uid).set(true)
-      ref.child('online').child(user.uid).onDisconnect().remove()
-      ref.child('.info/authenticated').on('value', function(snap) {
-        var online = snap.val()
-        if (!online)
-          ref.child('online').child(user.uid).remove()
-      })
-
-      ref.child('users').on('value', function(snap) {
-        self.setState({users: snap.val()})
-      })
-
-      ref.child('users').child(user.uid).on('value', function(snap) {
-        self.setState({userMeta: snap.val()})
-      })
-
-      self.setState({user: user})
-    })
-
-    // Populate online peeps
-    ref.child('online').on('value', function(snap) {
-      var currentUsers = snap.val()
-
-      self.setState({currentUsers: currentUsers})
-    })
-
-    this.setState({authClient: authClient})
+    usersStore.listen(function(users) {
+      this.setState({users: users})
+    }.bind(this))
   },
 
   setDrag: function(toggle) {
@@ -75,18 +41,12 @@ var Application = React.createClass({
     })
   },
 
-  moveMe: function(position) {
-    this.state.firebase.child('users').child(this.state.user.uid).update({
-      position: position
-    })
-  },
-
   renderMe: function() {
     if(this.state.user) {
-      var userMeta = this.state.userMeta
-      var props = lodash.extend(lodash.clone(userMeta), {
-         move: this.moveMe,
-         setDrag: this.setDrag
+      var user = this.state.user
+      var props = lodash.extend(lodash.clone(user), {
+         setDrag: this.setDrag,
+         position: user.position || {x: 0, y: 0}
       })
 
       return Me(props)
@@ -135,8 +95,6 @@ var Application = React.createClass({
 
   render: function() {
     var user = this.state.user
-    var userMeta = this.state.userMeta
-    var authClient = this.state.authClient
     var me = this.renderMe()
     var others = this.renderOthers()
     var connections = this.renderConnections()
@@ -146,9 +104,11 @@ var Application = React.createClass({
       dragging: this.state.dragging
     }
 
+    if (!user.uid)
+      return <Login />
+
     return (
       <div className="application">
-        <Auth user={user} userMeta={userMeta} authClient={authClient} />
 
         <div className={React.addons.classSet(classes)}>
           {connections}
