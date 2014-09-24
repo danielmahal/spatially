@@ -38,10 +38,8 @@ var usersStore = Reflux.createStore({
 
       Fb.firebase.child('users').child(userKey).off('value')
 
-      var obj = {}
-      obj[userKey] = {$apply: function() {return undefined}}
-
-      this.users = update(this.users, obj)
+      delete this.users[userKey]
+      this.users = update(this.users, {})
 
       this.trigger(this.users)
     }.bind(this))
