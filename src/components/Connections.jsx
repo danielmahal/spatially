@@ -5,7 +5,7 @@
 var React = require('react/addons')
 var lodash = require('lodash')
 
-var User = React.createClass({
+var Connections = React.createClass({
   renderConnection: function(connection) {
     var a = connection.users[0]
     var b = connection.users[1]
@@ -34,4 +34,4 @@ var User = React.createClass({
   }
 })
 
-module.exports = User
+module.exports = Connections
