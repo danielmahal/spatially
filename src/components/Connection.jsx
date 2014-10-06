@@ -13,13 +13,13 @@ var Connection = React.createClass({
       var gainNode = audioCtx.createGain()
       source.connect(gainNode)
       gainNode.connect(audioCtx.destination)
-      console.log('making sound!', audioCtx.destination, newProps.remoteStream);
       var elem = document.createElement('audio')
       elem.src = URL.createObjectURL(newProps.remoteStream)
       elem.setAttribute('autoPlay', true)
       elem.setAttribute('mute', true)
 
-      this.setState({'node': gainNode})
+      console.log('making sound!', audioCtx.destination, newProps.remoteStream);
+      this.setState({node: gainNode})
     }
   },
 

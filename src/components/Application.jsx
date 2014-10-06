@@ -37,6 +37,14 @@ var Application = React.createClass({
     this.bindAsObject(userRef, 'users')
 
     ref.onAuth(function(auth) {
+      if (auth) {
+        userRef.child(auth.uid).set({position: {x: 0, y: 0}})
+        userRef.child(auth.uid).onDisconnect().remove()
+      }
+
+      if (!auth && this.state.auth)
+        userRef.child(this.state.auth.uid).remove()
+
       this.setState({auth: auth})
     }.bind(this))
   },
@@ -148,7 +156,7 @@ var Application = React.createClass({
       <div className="application">
 
         <div className={React.addons.classSet(classes)}>
-          <Rtc id={auth.uid} fb={ref.child('rtc')} component={Connections}>
+          <Rtc id={auth.uid} fb={ref.child('rtc')} disableVideo={true} component={Connections}>
             {connections}
           </Rtc>
           {users}
