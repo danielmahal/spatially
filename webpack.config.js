@@ -18,7 +18,7 @@ module.exports = {
         loaders: [
             { test: /\.jsx$/, loader: 'jsx' },
             { test: /\.styl$/, loader: 'style!css!stylus' },
-            { test: /[\/]FirebaseSimpleLogin\.js$/, loader: "exports?FirebaseSimpleLogin" },
+            { test: /[\/]firebase\.js$/, loader: "exports?Firebase" },
         ]
     },
 

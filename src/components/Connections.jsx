@@ -24,11 +24,9 @@ var Connections = React.createClass({
       window.innerHeight
     ].join(' ')
 
-    var connections = lodash.map(this.props.connections, this.renderConnection)
-
     return this.transferPropsTo(
       <svg className="connections" viewBox={viewBox}>
-        {connections}
+        {this.props.children}
       </svg>
     )
   }

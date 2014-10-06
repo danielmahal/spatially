@@ -3,35 +3,41 @@
 'use strict';
 
 var React = require('react/addons')
-var Reflux = require('reflux')
+var ReactFireMixin = require('reactfire')
 
-var userStore = require('../stores/user')
-var usersStore = require('../stores/users')
+var Firebase = require('firebase')
+
 var Actions = require('../actions')
 
+var Rtc = require('react-rtc')
 var Login = require('./Login')
 var Me = require('./Me')
 var User = require('./User')
 var Connections = require('./Connections')
+var Connection = require('./Connection')
 var lodash = require('lodash')
 
+var ref = new Firebase('https://spatially.firebaseio.com')
+window.ref = ref
+
 var Application = React.createClass({
+  mixins: [ReactFireMixin],
+
   getInitialState: function() {
     return {
       users: {},
-      user: {},
+      auth: ref.getAuth(),
       dragging: false
     }
   },
 
-  componentDidMount: function() {
+  componentWillMount: function() {
+    var userRef = ref.child('users')
 
-    userStore.listen(function(user) {
-      this.setState({user: user})
-    }.bind(this))
+    this.bindAsObject(userRef, 'users')
 
-    usersStore.listen(function(users) {
-      this.setState({users: users})
+    ref.onAuth(function(auth) {
+      this.setState({auth: auth})
     }.bind(this))
   },
 
@@ -41,39 +47,33 @@ var Application = React.createClass({
     })
   },
 
-  renderMe: function() {
-    if(this.state.user) {
-      var user = this.state.user
-      var props = lodash.extend(lodash.clone(user), {
-         setDrag: this.setDrag,
-         position: user.position || {x: 0, y: 0}
+  renderUsers: function() {
+    var auth = this.state.auth
+    var users = this.state.users || {}
+
+    return lodash.map(users, function(user, uid) {
+      var props = lodash.extend(user, {
+        key: uid
       })
 
-      return Me(props)
-    }
+      if (uid === auth.uid)
+        return Me(lodash.extend(props, {
+          setDrag: this.setDrag,
+          position: user.position || {x: 0, y: 0}
+        }))
+
+      return User(props)
+    }.bind(this))
   },
 
-  renderOthers: function() {
-    var user = this.state.user
-
-    var otherUsers = lodash.reject(this.state.users, function(other, uid) {
-      return uid === user.uid
-    })
-
-    return lodash.map(otherUsers, function(other, key) {
-      return User(lodash.extend(other, {
-        key: key
-      }))
-    })
-  },
-
-  getConnections: function() {
-    var users = this.state.users
+  getMyConnections: function() {
+    var auth = this.state.auth
+    var users = this.state.users || {}
 
     return Object.keys(users).reduce(function(connections, userA) {
       return connections.concat(Object.keys(users)
         .filter(function(userB) {
-          return userA > userB
+          return userA > userB && (userA === auth.uid || userB === auth.uid)
         })
         .map(function(userB) {
           var distance = Math.sqrt(
@@ -84,6 +84,7 @@ var Application = React.createClass({
           var volume = distance / 300
 
           return {
+            key: userA + userB,
             users: [users[userA], users[userB]],
             distance: volume
           }
@@ -94,33 +95,63 @@ var Application = React.createClass({
     }, [])
   },
 
-  renderConnections: function() {
-    var connections = this.getConnections()
+  getOtherConnections: function() {
+    var auth = this.state.auth
+    var users = this.state.users || {}
 
-    return <Connections connections={connections} />
+    return Object.keys(users).reduce(function(connections, userA) {
+      return connections.concat(Object.keys(users)
+        .filter(function(userB) {
+          return userA > userB && userA !== auth.uid && userB !== auth.uid
+        })
+        .map(function(userB) {
+          var distance = Math.sqrt(
+            Math.pow(users[userB].position.y - users[userA].position.y, 2) +
+            Math.pow(users[userB].position.x - users[userA].position.x, 2)
+          )
+
+          var volume = distance / 300
+
+          return {
+            key: userA + userB,
+            distance: volume
+          }
+        })
+        .filter(function(connection) {
+          return connection.distance <= 1
+        }))
+    }, [])
+  },
+
+  renderMyConnections: function() {
+    var connections = this.getMyConnections()
+
+    return connections.map(Connection)
   },
 
   render: function() {
-    var user = this.state.user
-    var me = this.renderMe()
-    var others = this.renderOthers()
-    var connections = this.renderConnections()
+    var auth = this.state.auth
+
+    if (!auth)
+      return <Login />
+
+    var users = this.renderUsers()
+    var connections = this.renderMyConnections()
+    console.log(connections);
 
     var classes = {
       space: true,
       dragging: this.state.dragging
     }
 
-    if (!user.uid)
-      return <Login />
-
     return (
       <div className="application">
 
         <div className={React.addons.classSet(classes)}>
-          {connections}
-          {me}
-          {others}
+          <Rtc id={auth.uid} fb={ref.child('rtc')} component={Connections}>
+            {connections}
+          </Rtc>
+          {users}
         </div>
       </div>
     )
