@@ -1,0 +1,9 @@
+{
+  "firebase": "spatially",
+  "public": "views",
+  "ignore": [
+    "firebase.json",
+    "**/.*",
+    "**/node_modules/**"
+  ]
+}

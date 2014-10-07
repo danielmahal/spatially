@@ -8,15 +8,25 @@ var Connection = React.createClass({
 
   componentWillReceiveProps: function(newProps) {
     if (this.props.remoteStream !== newProps.remoteStream) {
+      // Hacky while experimenting!
+      // Setup
       var audioCtx = new (window.AudioContext || window.webkitAudioContext)()
       var source = audioCtx.createMediaStreamSource(newProps.remoteStream)
       var gainNode = audioCtx.createGain()
+      var destination = audioCtx.createMediaStreamDestination()
+
+      // Connections
       source.connect(gainNode)
-      gainNode.connect(audioCtx.destination)
+      gainNode.connect(destination)
+
+      // Remove default track and add the manipulated one
+      newProps.remoteStream.addTrack(destination.stream.getAudioTracks()[0])
+      newProps.remoteStream.removeTrack(newProps.remoteStream.getAudioTracks()[0])
+
+      // Play the stream through the browser!
       var elem = document.createElement('audio')
       elem.src = URL.createObjectURL(newProps.remoteStream)
       elem.setAttribute('autoPlay', true)
-      elem.setAttribute('mute', true)
 
       console.log('making sound!', audioCtx.destination, newProps.remoteStream);
       this.setState({node: gainNode})
@@ -27,8 +37,10 @@ var Connection = React.createClass({
     var users = this.props.users
     var distance = this.props.distance
 
-    if (this.state && this.state.node)
+    if (this.state && this.state.node) {
       this.state.node.value = 1 - distance
+      console.log(this.state.node)
+    }
     console.log(distance)
 
     var a = users[0]
