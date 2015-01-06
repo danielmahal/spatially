@@ -11,6 +11,32 @@ body {
   color: textColor
 }
 
+body,
+button {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+  -webkit-font-smoothing: antialiased
+}
+
+button {
+  font-size: 100%
+  -webkit-appearance: none
+  border: 0
+  background: lighten(backgroundColor, 5)
+  cursor: pointer
+  padding: 0.8em
+  border-radius: 2px
+  color: white
+  outline: none
+
+  &:hover {
+    background: lighten(@background, 2)
+  }
+
+  &:active {
+    background: @background
+  }
+}
+
 .auth {
   position: absolute
   z-index: 1
@@ -19,7 +45,7 @@ body {
 .menu {
   position: absolute
   top: 0
-  right: 0
+  right: 15px
 }
 
 .space {
@@ -84,5 +110,41 @@ body {
       box-shadow: 0 20px 10px 0 rgba(0, 0, 0, 0.2);
       transition-timing-function: cubic-bezier(0.190, 1.000, 0.220, 1.000);
     }
+  }
+}
+
+.login {
+  position: absolute
+  width: 300px
+  top: calc(50% - 90px)
+  left: calc(50% - 150px)
+  text-align: center
+
+  h1 {
+    font-size: 32px
+    font-weight: 300
+    line-height: 1.2em
+    margin-bottom: 0.8em
+  }
+
+  p {
+    line-height: 1.4em
+  }
+
+  .login-button.facebook {
+    margin-bottom: 1em
+    background: #3D599F
+
+    &:hover {
+      background: lighten(#3D599F, 5)
+    }
+
+    &:active {
+      background: #3D599F
+    }
+  }
+
+  .no-worries {
+    color: rgba(white, 0.4)
   }
 }
