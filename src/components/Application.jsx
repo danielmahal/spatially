@@ -9,12 +9,10 @@ var Firebase = require('firebase')
 
 var Actions = require('../actions')
 
-var Rtc = require('react-rtc')
 var Login = require('./Login')
 var Me = require('./Me')
 var User = require('./User')
 var Connections = require('./Connections')
-var Connection = require('./Connection')
 var lodash = require('lodash')
 
 var ref = new Firebase('https://spatially.firebaseio.com')
@@ -78,67 +76,33 @@ var Application = React.createClass({
     }.bind(this))
   },
 
-  getMyConnections: function() {
+  renderConnections: function() {
     var auth = this.state.auth
     var users = this.state.users || {}
 
     return Object.keys(users).reduce(function(connections, userA) {
       return connections.concat(Object.keys(users)
         .filter(function(userB) {
-          return userA > userB && (userA === auth.uid || userB === auth.uid)
+          // only one connection per pair
+          return userA > userB
         })
         .map(function(userB) {
           var distance = Math.sqrt(
             Math.pow(users[userB].position.y - users[userA].position.y, 2) +
             Math.pow(users[userB].position.x - users[userA].position.x, 2)
           )
-
-          var volume = distance / 300
 
           return {
             key: userA + userB,
             users: [users[userA], users[userB]],
-            distance: volume
+            distance: distance,
+            me: userA === auth.uid || userB === auth.uid
           }
         })
         .filter(function(connection) {
-          return connection.distance <= 1
+          return connection.distance / 400 <= 1
         }))
     }, [])
-  },
-
-  getOtherConnections: function() {
-    var auth = this.state.auth
-    var users = this.state.users || {}
-
-    return Object.keys(users).reduce(function(connections, userA) {
-      return connections.concat(Object.keys(users)
-        .filter(function(userB) {
-          return userA > userB && userA !== auth.uid && userB !== auth.uid
-        })
-        .map(function(userB) {
-          var distance = Math.sqrt(
-            Math.pow(users[userB].position.y - users[userA].position.y, 2) +
-            Math.pow(users[userB].position.x - users[userA].position.x, 2)
-          )
-
-          var volume = distance / 300
-
-          return {
-            key: userA + userB,
-            distance: volume
-          }
-        })
-        .filter(function(connection) {
-          return connection.distance <= 1
-        }))
-    }, [])
-  },
-
-  renderMyConnections: function() {
-    var connections = this.getMyConnections()
-
-    return connections.map(Connection)
   },
 
   logout: function() {
@@ -152,7 +116,7 @@ var Application = React.createClass({
       return <Login />
 
     var users = this.renderUsers()
-    var connections = this.renderMyConnections()
+    var connections = this.renderConnections()
 
     var classes = {
       space: true,
@@ -162,9 +126,7 @@ var Application = React.createClass({
     return (
       <div className="application">
         <div className={React.addons.classSet(classes)}>
-          <Rtc id={auth.uid} fb={ref.child('rtc')} disableVideo={true} component={Connections}>
-            {connections}
-          </Rtc>
+          <Connections connections={connections} />
           {users}
         </div>
 

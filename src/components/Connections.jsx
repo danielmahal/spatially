@@ -3,20 +3,34 @@
 'use strict';
 
 var React = require('react/addons')
+var Connection = require('./Connection');
 var lodash = require('lodash')
 
-var Connections = React.createClass({
-  renderConnection: function(connection) {
-    var a = connection.users[0]
-    var b = connection.users[1]
-    var path = ['M', a.position.x, a.position.y, 'L', b.position.x, b.position.y].join(' ')
-    var strokeWidth = (1 - connection.distance) * 5
-    // var style = { opacity: 1 - connection.distance }
+navigator.getUserMedia = navigator.getUserMedia ||
+  navigator.webkitGetUserMedia ||
+  navigator.mozGetUserMedia
 
-    return <path stroke="white" strokeWidth={strokeWidth} d={path} />
+var Connections = React.createClass({
+  getInitialState: function() {
+    return {}
+  },
+
+  componentDidMount: function() {
+    navigator.getUserMedia(
+      {video: false, audio: true},
+      function(stream) {
+        this.setState({
+          localStream: stream
+        });
+      }.bind(this),
+      console.error.bind(console)
+    )
   },
 
   render: function() {
+    var localStream = this.state.localStream;
+    var connections = this.props.connections;
+
     var viewBox = [
       window.innerWidth * -0.5,
       window.innerHeight * -0.5,
@@ -26,7 +40,16 @@ var Connections = React.createClass({
 
     return this.transferPropsTo(
       <svg className="connections" viewBox={viewBox}>
-        {this.props.children}
+        {connections
+          .filter(function(connection) {
+            return localStream || !connection.me
+          })
+          .map(function(connection) {
+            return Connection(lodash.extend(connection, {
+              localStream: localStream
+            }))
+          })
+        }
       </svg>
     )
   }

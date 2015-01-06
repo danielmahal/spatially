@@ -16,7 +16,6 @@
     "stylus-loader": "^0.4.0",
     "webpack": "^1.4.0-beta5",
     "reactfire": "^0.2.0",
-    "firebase": "^1.1.0",
-    "react-rtc": "^0.0.4"
+    "firebase": "^1.1.0"
   }
 }

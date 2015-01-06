@@ -102,7 +102,7 @@ function rtc(ref, stream, callback) {
 
   return {
     close: function() {
-      listneres.forEach(function(listener) {
+      listeners.forEach(function(listener) {
         ref.off('value', listener);
       });
       ref.remove();

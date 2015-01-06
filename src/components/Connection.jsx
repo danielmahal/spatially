@@ -3,10 +3,14 @@
 'use strict';
 
 var React = require('react/addons')
+var rtc = require('../rtc');
+
+// TODO: Move data into stores.
+var ref = new Firebase('https://spatially.firebaseio.com/rtc')
 
 var Connection = React.createClass({
 
-  componentWillReceiveProps: function(newProps) {
+  /*componentWillReceiveProps: function(newProps) {
     if (this.props.remoteStream !== newProps.remoteStream) {
       // Hacky while experimenting!
       // Setup
@@ -31,20 +35,51 @@ var Connection = React.createClass({
       console.log('making sound!', audioCtx.destination, newProps.remoteStream);
       this.setState({node: gainNode})
     }
+  },*/
+
+  componentDidMount: function() {
+    if (!this.props.me || !this.props.localStream)
+      return;
+
+    var key = this.props.key
+    var localStream = this.props.localStream
+
+    var connection = rtc(ref.child(key), localStream, function(err, remoteStream) {
+      if (err)
+        return console.error(err)
+
+      var elem = document.createElement('audio')
+      elem.src = URL.createObjectURL(remoteStream)
+      elem.setAttribute('autoPlay', true)
+      console.log(elem);
+
+      this.setState({
+        remoteStream: remoteStream
+      })
+    }.bind(this))
+
+    this.setState({
+      connection: connection
+    })
+  },
+
+  componentWillUnmount: function() {
+    if (this.state.connection)
+      this.state.connection.close();
   },
 
   render: function() {
     var users = this.props.users
-    var distance = this.props.distance
+    var normalizedDistance = this.props.distance / 400
 
     if (this.state && this.state.node) {
-      this.state.node.value = 1 - distance
+      this.state.node.value = 1 - normalizedDistance
     }
 
     var a = users[0]
     var b = users[1]
     var path = ['M', a.position.x, a.position.y, 'L', b.position.x, b.position.y].join(' ')
-    var strokeWidth = (1 - distance) * 5
+    var strokeWidth = (1 - normalizedDistance) * 5
     // var style = { opacity: 1 - distance }
 
     return <path stroke="white" strokeWidth={strokeWidth} d={path} />
