@@ -5,7 +5,6 @@
 var React = require('react')
 var Actions = require('../actions')
 var User = require('./User')
-var TakePicture = require('./TakePicture')
 
 var Me = React.createClass({
   getInput: function(e) {
@@ -62,9 +61,7 @@ var Me = React.createClass({
 
   render: function() {
     return this.transferPropsTo(
-      <User className="me" position={this.props.position} onMouseDown={this.dragStart} onTouchStart={this.dragStart}>
-        <TakePicture profilePic={this.props.profilePic} />
-      </User>
+      <User className="me" position={this.props.position} onMouseDown={this.dragStart} onTouchStart={this.dragStart} />
     )
   }
 })

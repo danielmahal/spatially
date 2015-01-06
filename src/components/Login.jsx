@@ -11,14 +11,8 @@ var Login = React.createClass({
     return (
       <div className="login">
         <h1>Welcome to Spatially!</h1>
-        <p>
-          To get started talking, click Anoymous login and read the improved copy ..
-        </p>
-        <ul>
-          <li onClick={Actions.login}>Anonymous</li>
-          <li>Facebook</li>
-          <li>Google</li>
-        </ul>
+        <p>Please login using Facebook. No worries, we only use your facebook account as authentication and for your name and picture.</p>
+        <button className="login-button facebook" onClick={Actions.login}>Login with Facebook</button>
       </div>
     )
   }

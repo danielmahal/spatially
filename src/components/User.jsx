@@ -6,7 +6,7 @@ var React = require('react/addons')
 
 var User = React.createClass({
   renderImage: function() {
-    var image = this.props.profilePic
+    var image = this.props.picture
 
     if(image) {
       return <img src={image} />

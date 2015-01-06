@@ -38,7 +38,11 @@ var Application = React.createClass({
 
     ref.onAuth(function(auth) {
       if (auth) {
-        userRef.child(auth.uid).set({position: {x: 0, y: 0}})
+        userRef.child(auth.uid).set({
+          picture: auth.facebook.cachedUserProfile.picture.data.url,
+          position: {x: 0, y: 0}
+        })
+
         userRef.child(auth.uid).onDisconnect().remove()
       }
 
@@ -137,6 +141,10 @@ var Application = React.createClass({
     return connections.map(Connection)
   },
 
+  logout: function() {
+    Actions.logout()
+  },
+
   render: function() {
     var auth = this.state.auth
 
@@ -145,7 +153,6 @@ var Application = React.createClass({
 
     var users = this.renderUsers()
     var connections = this.renderMyConnections()
-    console.log(connections);
 
     var classes = {
       space: true,
@@ -154,13 +161,16 @@ var Application = React.createClass({
 
     return (
       <div className="application">
-
         <div className={React.addons.classSet(classes)}>
           <Rtc id={auth.uid} fb={ref.child('rtc')} disableVideo={true} component={Connections}>
             {connections}
           </Rtc>
           {users}
         </div>
+
+        <menu className="menu">
+          <button className="logout" onClick={this.logout}>Log out</button>
+        </menu>
       </div>
     )
   }

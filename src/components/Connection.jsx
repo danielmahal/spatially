@@ -39,9 +39,7 @@ var Connection = React.createClass({
 
     if (this.state && this.state.node) {
       this.state.node.value = 1 - distance
-      console.log(this.state.node)
     }
-    console.log(distance)
 
     var a = users[0]
     var b = users[1]
