@@ -6,7 +6,7 @@ var React = require('react/addons')
 
 var User = React.createClass({
   renderImage: function() {
-    var image = this.props.picture
+    var image = 'https://graph.facebook.com/' + this.props.facebookId + '/picture?width=100&height=100'
 
     if(image) {
       return <img src={image} />

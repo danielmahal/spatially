@@ -39,7 +39,7 @@ var Application = React.createClass({
     ref.onAuth(function(auth) {
       if (auth) {
         userRef.child(auth.uid).set({
-          picture: 'https://graph.facebook.com/' + auth.facebook.id + '/picture?type=large',
+          facebookId: auth.facebook.id,
           position: {x: 0, y: 0}
         })
 
