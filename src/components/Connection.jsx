@@ -10,6 +10,10 @@ var ref = new Firebase('https://spatially.firebaseio.com/rtc')
 
 var Connection = React.createClass({
 
+  getInitialState: function() {
+    return {}
+  },
+
   /*componentWillReceiveProps: function(newProps) {
     if (this.props.remoteStream !== newProps.remoteStream) {
       // Hacky while experimenting!
