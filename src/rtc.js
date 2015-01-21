@@ -52,6 +52,9 @@ function rtc(ref, stream, callback) {
       if (err)
         return callback(err);
 
+      if (pc.signalingState === 'closed')
+        return callback('Connection was closed before handshake completed');
+
       var local = success ? 'offer' : 'answer';
       var remote = success ? 'answer' : 'offer';
 
@@ -79,6 +82,8 @@ function rtc(ref, stream, callback) {
               return callback(err);
             if (!success)
               return callback('Both offerer and answerer already set!');
+            if (pc.signalingState === 'closed')
+              return callback('Connection was closed before handshake completed');
 
             pc.setLocalDescription(answer);
           });
