@@ -57,13 +57,18 @@ function rtc(ref, stream, callback) {
 
       if (success) {
         pc.setLocalDescription(offer);
-        listeners.push(ref.child(remote).child('sdp').on('value', function(snap) {
-          var remoteSdp = JSON.parse(snap.val());
-          if (!remoteSdp)
-            return;
+        var sdpRef = ref.child(remote).child('sdp')
+        listeners.push({
+          type: 'value',
+          ref: sdpRef,
+          callback: sdpRef.on('value', function(snap) {
+            var remoteSdp = JSON.parse(snap.val());
+            if (!remoteSdp || pc.signalingState === 'closed')
+              return;
 
-          pc.setRemoteDescription(new SessionDescription(remoteSdp));
-        }));
+            pc.setRemoteDescription(new SessionDescription(remoteSdp));
+          })
+        });
       } else {
         pc.setRemoteDescription(new SessionDescription(JSON.parse(snap.val())));
         pc.createAnswer(function(answer) {
@@ -74,6 +79,8 @@ function rtc(ref, stream, callback) {
               return callback(err);
             if (!success)
               return callback('Both offerer and answerer already set!');
+
+            pc.setLocalDescription(answer);
           });
         }, function(err) {
           return callback(err);
@@ -87,14 +94,19 @@ function rtc(ref, stream, callback) {
         ref.child(local).child('ice').push(JSON.stringify(evt.candidate));
       };
 
-      listeners.push(ref.child(remote).child('ice').on('child_added', function(snap) {
-        var iceCandidate = JSON.parse(snap.val());
+      var iceRef = ref.child(remote).child('ice');
+      listeners.push({
+        type: 'child_added',
+        ref: iceRef,
+        callback: iceRef.on('child_added', function(snap) {
+          var iceCandidate = JSON.parse(snap.val());
 
-        if (!iceCandidate)
-          return;
+          if (!iceCandidate || pc.signalingState === 'closed')
+            return;
 
-        pc.addIceCandidate(new IceCandidate(iceCandidate));
-      }));
+          pc.addIceCandidate(new IceCandidate(iceCandidate));
+        })
+      });
     });
   }, function(err) {
     return callback(err);
@@ -103,7 +115,7 @@ function rtc(ref, stream, callback) {
   return {
     close: function() {
       listeners.forEach(function(listener) {
-        ref.off('value', listener);
+        listener.ref.off(listener.type, listener.callback);
       });
       ref.remove();
       pc.close();

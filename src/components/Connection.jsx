@@ -48,14 +48,14 @@ var Connection = React.createClass({
     var key = this.props.key
     var localStream = this.props.localStream
 
-    var connection = rtc(ref.child(key), localStream, function(err, remoteStream) {
+    var connection = new rtc(ref.child(key), localStream, function(err, remoteStream) {
       if (err)
         return console.error(err)
 
       var elem = document.createElement('audio')
       elem.src = URL.createObjectURL(remoteStream)
       elem.setAttribute('autoPlay', true)
-      console.log(elem);
+      document.body.appendChild(elem);
 
       this.setState({
         remoteStream: remoteStream
